@@ -1,5 +1,6 @@
 package com.example.demo
 
+import kotlinx.coroutines.reactive.asFlow
 import org.springframework.core.io.buffer.DataBuffer
 import org.springframework.core.io.buffer.DataBufferUtils
 import org.springframework.http.server.reactive.ServerHttpRequest
@@ -16,17 +17,13 @@ import reactor.core.publisher.Mono
 class ChunkController {
 
     @PostMapping
-    fun postChunked(request: ServerHttpRequest): Mono<Void> {
-        val dataBuffers: Flux<DataBuffer> = request.body
+    suspend fun postChunked(request: ServerHttpRequest) {
+        request.body.asFlow().collect {dataBuffer ->
+            val byteArray = ByteArray(dataBuffer.readableByteCount())
+            dataBuffer.read(byteArray)
+            print(String(byteArray))
 
-        return dataBuffers
-            .doOnNext { dataBuffer ->
-                val byteArray = ByteArray(dataBuffer.readableByteCount())
-                dataBuffer.read(byteArray)
-                print(String(byteArray))
-
-                DataBufferUtils.release(dataBuffer)
-            }
-            .then()
+            DataBufferUtils.release(dataBuffer)
+        }
     }
 }
