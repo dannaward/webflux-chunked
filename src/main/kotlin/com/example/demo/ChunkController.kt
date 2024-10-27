@@ -2,6 +2,7 @@ package com.example.demo
 
 import org.springframework.core.io.buffer.DataBuffer
 import org.springframework.core.io.buffer.DataBufferUtils
+import org.springframework.http.server.reactive.ServerHttpRequest
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
@@ -15,8 +16,8 @@ import reactor.core.publisher.Mono
 class ChunkController {
 
     @PostMapping
-    fun handleChunkedRequest(exchange: ServerWebExchange): Mono<Void> {
-        val dataBuffers: Flux<DataBuffer> = exchange.request.body
+    fun postChunked(request: ServerHttpRequest): Mono<Void> {
+        val dataBuffers: Flux<DataBuffer> = request.body
 
         return dataBuffers
             .doOnNext { dataBuffer ->
